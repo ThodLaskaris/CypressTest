@@ -216,25 +216,23 @@ describe('First test suite', () => {
     })
 
 
-    it.only('Date picker', () => {
+    it('Date picker', () => {
         cy.visit('/')
-        cy.contains('Forms')
-            .click()
-        cy.contains('Datepicker')
-            .click()
+        cy.contains('Forms').click()
+        cy.contains('Datepicker').click()
 
         let date = new Date()
         date.setDate(date.getDate() + 2)
-        let futureDate = date.getDate()
-        let dateToAssert = `Sep ${futureDate}, 2023`
 
-        console.log(date)
+        let futureDate = date.getDate()
+        let futureMonth = date.toLocaleString('en-US', { month: 'short' }) // 'Jun'
+        let futureYear = date.getFullYear()
+        let dateToAssert = `${futureMonth} ${futureDate}, ${futureYear}`
 
         cy.contains('nb-card', 'Common Datepicker')
             .find('input')
             .then(input => {
-                cy.wrap(input)
-                    .click()
+                cy.wrap(input).click()
 
                 cy.get('.day-cell')
                     .not('.bounding-month')
@@ -249,4 +247,49 @@ describe('First test suite', () => {
                     .should('have.value', dateToAssert)
             })
     })
+
+    it.only('Lists and Dropdowns', () => {
+        cy.visit('/')
+
+
+        //1 way.
+        cy.get('nav')
+            .find('nb-select')
+            .click()
+
+        cy.get('.options-list')
+            .contains('Dark')
+            .click()
+
+        cy.get('nav nb-select')
+            .should('contain', 'Dark')
+            .click()
+
+
+        //2. way Loop through the options and select one by one.
+
+
+
+        cy.get('nav nb-select')
+            .then(dropDown => {
+                cy.wrap(dropDown)
+                    .click()
+
+                cy.get('.options-list nb-option')
+                    .each((listItem, index) => {
+                        const itemText = listItem.text().trim()
+
+                        cy.wrap(listItem)
+                            .click()
+
+                        cy.wrap(dropDown)
+                            .should('contain', itemText)
+
+                        if (index < 3) {
+                            cy.wrap(dropDown).click()
+                        }
+                    })
+            })
+    })
+
 })
