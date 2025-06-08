@@ -113,7 +113,7 @@ describe('First test suite', () => {
             })
     })
 
-    it.only('extract text values', () => {
+    it('extract text values', () => {
         cy.visit('/')
         cy.contains('Forms')
             .click()
@@ -135,35 +135,86 @@ describe('First test suite', () => {
 
         // 3. Cypress Invoke     
         cy.get('[for="exampleInputEmail1"]')
-        .invoke('text')
-        .then( text => {
-            expect(text).to.equal('Email address')
-        })
+            .invoke('text')
+            .then(text => {
+                expect(text).to.equal('Email address')
+            })
         cy.get('[for="exampleInputEmail1"]')
-        .invoke('text')
-        .as('labelTextAlias')
-        .then( text => {
-            expect(text).to.equal('Email address')
-        })
+            .invoke('text')
+            .as('labelTextAlias')
+            .then(text => {
+                expect(text).to.equal('Email address')
+            })
 
         //4. invoke attribute
 
-           cy.get('[for="exampleInputEmail1"]')
-           .invoke('attr', 'class')
-           .then( classValue => {
-            expect(classValue).to.equal('label')
-           })
+        cy.get('[for="exampleInputEmail1"]')
+            .invoke('attr', 'class')
+            .then(classValue => {
+                expect(classValue).to.equal('label')
+            })
         //5. invoke property
 
         cy.get('#exampleInputEmail1')
-        .type('thodoris@thodoris.gr')
+            .type('thodoris@thodoris.gr')
 
-               cy.get('#exampleInputEmail1')
-               .invoke('prop', 'value')
-               .should('contain', 'thodoris@thodoris.gr')
-               .then( propertyValue => {
+        cy.get('#exampleInputEmail1')
+            .invoke('prop', 'value')
+            .should('contain', 'thodoris@thodoris.gr')
+            .then(propertyValue => {
                 expect(propertyValue).to.equal('thodoris@thodoris.gr')
-               })
+            })
+
+
+
+    })
+    it('radio buttons', () => {
+        cy.visit('/')
+        cy.contains('Forms').click()
+        cy.contains('Form Layouts').click()
+
+        cy.contains('nb-card', 'Using the Grid')
+            .find('[type="radio"]')
+            .then(radioButtons => {
+                // Επιλέγουμε το πρώτο
+                cy.wrap(radioButtons)
+                    .eq(0)
+                    .check({ force: true })
+                    .should('be.checked')
+
+                // Επιλέγουμε το δεύτερο
+                cy.wrap(radioButtons)
+                    .eq(1)
+                    .check({ force: true })
+                    .should('be.checked')
+
+                // Ελέγχουμε ότι το πρώτο ΔΕΝ είναι πια επιλεγμένο
+                cy.wrap(radioButtons)
+                    .eq(0)
+                    .should('not.be.checked')
+
+                // Το τρίτο radio button πρέπει να είναι απενεργοποιημένο
+                cy.wrap(radioButtons)
+                    .eq(2)
+                    .should('be.disabled')
+            })
     })
 
-})// test change
+    it.only('checkboxes', () => {
+        cy.visit('/')
+        cy.contains('Modal & Overlays')
+            .click()
+        cy.contains('Toastr')
+            .click()
+
+        cy.get('[type="checkbox"]')
+            .uncheck({ force: true })
+
+        cy.get('[type="checkbox"]')
+        .eq(0)
+        .click({ force: true})
+    })
+
+
+
+})
