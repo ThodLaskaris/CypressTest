@@ -248,7 +248,7 @@ describe('First test suite', () => {
             })
     })
 
-    it.only('Lists and Dropdowns', () => {
+    it('Lists and Dropdowns', () => {
         cy.visit('/')
 
 
@@ -269,7 +269,6 @@ describe('First test suite', () => {
         //2. way Loop through the options and select one by one.
 
 
-
         cy.get('nav nb-select')
             .then(dropDown => {
                 cy.wrap(dropDown)
@@ -278,6 +277,7 @@ describe('First test suite', () => {
                 cy.get('.options-list nb-option')
                     .each((listItem, index) => {
                         const itemText = listItem.text().trim()
+
 
                         cy.wrap(listItem)
                             .click()
@@ -290,6 +290,158 @@ describe('First test suite', () => {
                         }
                     })
             })
+
     })
 
+
+    it('Web tables', () => {
+        cy.visit('/')
+        cy.contains('Tables & Data')
+            .click()
+        cy.contains('Smart Table')
+            .click()
+
+
+        // How to get the row of the table by text.
+
+        cy.get('tbody')
+            .contains('tr', 'Larry')
+            .then(tableRow => {
+                cy.wrap(tableRow)
+                    .find('.nb-edit')
+                    .click()
+
+                cy.wrap(tableRow)
+                    .find('[placeholder="Age"]')
+                    .clear() // clear the input value
+                    .type('95')
+
+                cy.wrap(tableRow)
+                    .find('.nb-checkmark')
+                    .click()
+
+                cy.wrap(tableRow)
+                    .find('td')
+                    .eq(6)
+                    .should('contain', '95')
+
+            })
+
+        // Get row by index
+
+        cy.get('thead').find('.nb-plus').click()
+
+        cy.get('thead')
+            .find('tr')
+            .eq(2)
+            .then(tableRow => {
+                cy.wrap(tableRow)
+                    .find('[placeholder="First Name"]')
+                    .type('Thodoris')
+
+                cy.wrap(tableRow)
+                    .find('[placeholder="Last Name"]')
+                    .type('Laskaris')
+
+                cy.wrap(tableRow)
+                    .find('.nb-checkmark')
+                    .click()
+            })
+
+        cy.get('tbody tr')
+            .first()
+            .find('td')
+            .then(tableColumns => {
+                cy.wrap(tableColumns)
+                    .eq(2)
+                    .should('contain', 'Thodoris')
+
+                cy.wrap(tableColumns)
+                    .eq(3)
+                    .should('contain', 'Laskaris')
+            })
+        //3rd. Validation
+        const age = [20, 30, 40, 51, 200]
+
+
+        cy.wrap(age)
+            .each(age => {
+                cy.get('thead [placeholder = "Age"]')
+                    .clear()
+                    .type(age)
+                    .wait(800)
+                cy.get('tbody tr')
+                    .each(tableRow => {
+                        if (age == 200) {
+                            cy.wrap(tableRow)
+                                .should('contain', 'No data found')
+                        } else {
+                            cy.wrap(tableRow)
+                                .find('td')
+                                .eq(6)
+                                .should('contain', age)
+                        }
+                    })
+            })
+
+
+    })
+
+    it('ToolTip', () => {
+        cy.visit('/')
+        cy.contains('Modal & Overlays')
+            .click()
+
+        cy.contains('Tooltip')
+            .click()
+
+        cy.contains('nb-card', 'Colored Tooltips')
+            .contains('Default')
+            .click()
+        cy.get('nb-tooltip')
+            .should('contain', 'This is a tooltip')
+
+
+    })
+
+    it.only('Dialog', () => {
+        cy.visit('/')
+        cy.contains('Tables & Data')
+            .click()
+        cy.contains('Smart Table')
+            .click()
+
+        //1 method 
+        cy.get('tbody tr')
+            .first()
+            .find('.nb-trash')
+            .click()
+
+        cy.on('window:confirm', (confirm) => {
+            expect(confirm).to.equal('Are you sure you want to delete?')
+        })
+
+        // 2 method
+        // Cleaner approach using stubs.
+
+        const stub = cy.stub()
+        cy.on('window:confirm', stub)
+        cy.get('tbody tr')
+            .first()
+            .find('.nb-trash')
+            .click()
+            .then(() => {
+                expect(stub.getCall(0)).to.be.calledWith('Are you sure you want to delete?')
+            })
+
+        //3 method
+        cy.get('tbody tr')
+            .first()
+            .find('.nb-trash')
+            .click()
+        cy.on('window:confirm', (confirm) => {
+            false // Do not confirm the dialog
+        })
+
+    })
 })
